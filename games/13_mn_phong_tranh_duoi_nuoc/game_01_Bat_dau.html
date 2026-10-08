@@ -457,13 +457,14 @@ footer{text-align:center;font-size:.78rem;font-weight:800;color:var(--ink-faint)
           <button class="btn ghost" id="btnRescanVoice">🔄 Kiểm tra giống lại</button>
         </div>
         <div id="voiceGuide" class="set-item" style="display:none;margin-top:6px">
-          <div class="lbl" style="font-weight:800">👦 Chưa có giống tiếng Việt trên máy — cách cài (2 phút)</div>
+          <div class="lbl" style="font-weight:800">👦 Chưa có giọng tiếng Việt trên máy — cách cài (2 phút)</div>
           <ol style="margin:6px 0;padding-left:18px;font-size:.85rem;line-height:1.55">
-            <li><b>Windows 10/11:</b> Cái đặt → Thời gian &amp; Ngân ngử (Time &amp; Language) → Ngân ngử (Language) → bởt sử dụng <b>Tiếng Việt</b>, trong mục <b>Giống (Voice)</b> bởt “Microsoft Hieu” hoặc cài “<b>Microsoft Server Vietnamese (Natural)</b>”.</li>
-            <li><b>Chrome/Edge:</b> Cài đặt → Hệ thống (System languages) → thêm <b>Tiếng Việt</b> (Chrome tự đặn tải giống “Google Vietnamese” khi có mạng).</li>
-            <li>Sau khi cài: bám <b>🔄 Kiểm tra giống lại</b> bên trên — giống sẽ hiện trong đưng xuổng.</li>
+            <li><b>Windows 10/11:</b> Cài đặt → Thời gian &amp; Ngôn ngữ (Time &amp; Language) → Ngôn ngữ (Language) → bật sử dụng <b>Tiếng Việt</b>. Trong mục <b>Giọng (Voice)</b> bật "Microsoft Hieu" hoặc cài "<b>Microsoft Server Vietnamese (Natural)</b>" (giọng Neural chất lượng cao).</li>
+            <li><b>Chrome / Edge:</b> Cài đặt → Hệ thống (System languages) → thêm <b>Tiếng Việt</b> (trình duyệt tự tải giọng "Google Vietnamese" khi có mạng).</li>
+            <li>Sau khi cài: bấm <b>🔄 Kiểm tra giọng lại</b> bên trên — giọng sẽ hiện trong dropdown.</li>
+            <li>💡 Nếu đang chạy mã cũ (Service Worker cache): <b>Ctrl+F5</b> (Windows) hoặc tắt hẳn trình duyệt rồi mở lại để nạp code mới.</li>
           </ol>
-          <div style="font-size:.8rem;color:var(--ink-soft)">Ngâu chưa có giống riêng, game vịn đọc bằng <b>ngân ngử vi-VN</b> (giống hệ thống gần nhất) để bé vạn theo kễp bài học.</div>
+          <div style="font-size:.8rem;color:var(--ink-soft)">Nếu chưa có giọng riêng, game vẫn đọc bằng ngôn ngữ vi-VN (giọng hệ thống gần nhất) để bé vẫn theo kịp bài học.</div>
         </div>
         <div class="row" style="margin-top:16px">
           <button class="btn amber" id="btnSaveSettings">💾 Lưu cài đặt</button>
@@ -746,30 +747,32 @@ const TTS=(function(){
 })();
 
 function refreshVoiceUI(){
-   if(typeof el!=='function') return;
+   if(typeof el!=="function") return;
    const sel=el('setVoice'); if(!sel) return;
    const vi=TTS.viVoices();
+   const totalAll=TTS.allVoices().length;
    const guide=el('voiceGuide');
    sel.innerHTML='';
    if(vi.length===0){
-     sel.innerHTML='<option value="">\u2014 Ch\u01b0a ph\u00e1t hi\u1ec7n gi\u1ed1ng vi-VN \u2014</option>';
+     sel.innerHTML='<option value="">— Chưa phát hiện giọng vi-VN —</option>';
      if(el('voiceStatus')){
        el('voiceStatus').textContent=TTS.isSupported
-         ? '\u0110ang t\u00ecm gi\u1ed1ng vi-VN\u2026 (b\u00e1m \ud83d\udd04 Ki\u1ec3m tra gi\u1ed1ng l\u1ea1i n\u1ebfu ch\u01b0a hi\u1ec7n)'
-         : 'Tr\u00ecnh duy\u1ec7t n\u00e0y kh\u00f4ng h\u1ed1 tr\u1ee3 \u0111\u1ecdc ti\u1ebfng (Web Speech).';
+         ? (totalAll>0
+            ? 'Đã tìm '+totalAll+' giống, chưa có tiếng Việt → xem hướng dẫn bên dưới (cài tiếng Việt) → bám 🔄 Kiểm tra lại → Ctrl+F5.'
+            : 'Chưa nậ5p được giống nào → bám Ctrl+F5 để nậ5p lại, hoặc cài tiếng Việt (xem hướng dẫn bên dưới).')
+         : 'Trình duyệt này không hố trợ đọc tiếng (Web Speech) → dùng Chrome hoặc Edge.';
      }
      if(guide) guide.style.display=TTS.isSupported?'block':'none';
    }else{
      const cur=TTS.resolve();
      vi.forEach(v=>{ const o=document.createElement('option'); o.value=v.name; o.textContent=v.name+'  ('+(v.lang||'vi')+')'; if(cur&&v.name===cur.name) o.selected=true; sel.appendChild(o); });
-     if(el('voiceStatus')) el('voiceStatus').textContent='\u2713 \u0110\u00e3 ph\u00e1t hi\u1ec7n '+vi.length+' gi\u1ed1ng ti\u1ebfng Vi\u1ec7t: \u0111ang d\u00f9ng "'+(cur?cur.name:'vi-VN')+'".';
+     if(el('voiceStatus')) el('voiceStatus').textContent='✓ Đã phát hiện '+vi.length+' giống tiếng Việt (trên '+totalAll+' giống tổng): đang dùng "'+(cur?cur.name:'vi-VN')+'".';
      if(guide) guide.style.display='none';
    }
 }
-
 if(TTS.isSupported){ TTS.load(); try{ speechSynthesis.onvoiceschanged=function(){ TTS.refresh(); refreshVoiceUI(); }; }catch(e){} }
 function speak(text,opts){ TTS.speak(text,opts); }
-if(typeof el==='function' && el('btnRescanVoice')){ el('btnRescanVoice').addEventListener('click',function(){ TTS.refresh(); TTS.load(); refreshVoiceUI(); if(el('voiceStatus')) el('voiceStatus').textContent='\u0110ang ki\u1ec3m tra l\u1ea1i gi\u1ed1ng\u2026'; }); }
+if(typeof el==='function' && el('btnRescanVoice')){ el('btnRescanVoice').addEventListener('click',function(){ TTS.refresh(); TTS.load(); refreshVoiceUI(); if(el('voiceStatus')) el('voiceStatus').textContent='Đang kiểm tra lại giống… (nếu vịn chưa thấy → bám Ctrl+F5 để nậ5p lại code mới)'; }); }
 
 
 /* ============================================================

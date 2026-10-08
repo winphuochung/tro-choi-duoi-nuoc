@@ -4,7 +4,7 @@
    ============================================================ */
 'use strict';
 
-const CACHE_NAME = 'duoi-nuoc-v1';
+const CACHE_NAME = 'duoi-nuoc-v2';
 const PRECACHE_URLS = [
   './index.html',
   './manifest.json',
@@ -66,11 +66,20 @@ self.addEventListener('fetch', function (event) {
 /* Stale-While-Revalidate: trả cache cũ trước, fetch sau, cập nhật cache */
 function swResponse(request) {
   return caches.open(RUNTIME_CACHE).then(function (cache) {
+    var isHTML = /\.[hH][tT][mM][lL]?(\?|#|$)/.test(request.url);
+    if (isHTML) {
+      // HTML: Network-first (always get latest code; cache only as offline fallback)
+      return fetch(request).then(function (res) {
+        if (res && res.ok) cache.put(request, res.clone());
+        return res;
+      }).catch(function () {
+        return cache.match(request).then(function (c) { return c || Response.error(); });
+      });
+    }
+    // Assets: Stale-While-Revalidate (fast, still updates in background)
     return cache.match(request).then(function (cached) {
       var network = fetch(request).then(function (res) {
-        if (res && res.ok) {
-          cache.put(request, res.clone());
-        }
+        if (res && res.ok) cache.put(request, res.clone());
         return res;
       }).catch(function () {
         return cached || Response.error();
