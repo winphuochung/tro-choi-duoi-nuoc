@@ -14,3 +14,7 @@ node_modules/
 # Keep only source. If you ever add build output, ignore it here:
 # dist/
 # build/
+  
+"# -- uploaded reference screenshots (agent temp) --"  
+upload_*.jpg  
+upload_*.png  
