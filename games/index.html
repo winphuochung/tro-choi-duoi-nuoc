@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Thư Viện Trò Chơi Giáo Dục — An Toàn Dưới Nước</title>
+<meta name="theme-color" content="#0284C7">
+<link rel="manifest" href="../manifest.json">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#0284C7; --primary-l:#38BDF8;
+  --amber:#F59E0B; --amber-l:#FBBF24;
+  --ok:#10B981; --bad:#EF4444; --warn:#F97316;
+  --ink:#0F2A43; --ink-soft:#3B6B8F;
+  --card-bg:#FFFFFF;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Nunito','Segoe UI',system-ui,sans-serif;
+  color:var(--ink);
+  background:linear-gradient(160deg,#F0F9FF,#FEF9C3 35%,#FDF2F8 70%,#F0FDF4) fixed;
+  min-height:100vh; overflow-x:hidden;
+}
+/* ---- Lượn sóng động ở đáy ---- */
+.wave-bg{position:fixed;left:0;right:0;bottom:0;height:120px;z-index:0;pointer-events:none;overflow:hidden}
+.wave-bg svg{width:200%;height:100%;animation:waveSlide 12s linear infinite}
+.wave-bg svg + svg{animation-duration:18s;animation-direction:reverse;opacity:.6}
+@keyframes waveSlide{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+.wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:24px 20px 140px}
+
+/* ---- Header / Glass HUD ---- */
+.topbar{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  background:rgba(255,255,255,.6);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:2px solid rgba(56,189,248,.35);border-radius:999px;
+  padding:12px 22px;margin-bottom:28px;
+  box-shadow:0 8px 0 rgba(56,189,248,.25),0 15px 25px rgba(0,0,0,.08);
+}
+.logo{width:56px;height:56px;border-radius:50%;background:linear-gradient(145deg,#38BDF8,#0284C7);
+  display:flex;align-items:center;justify-content:center;font-size:30px;box-shadow:0 6px 0 #075985;flex:none}
+.topbar h1{font-size:clamp(1.2rem,3.5vw,2.2rem);font-weight:900;line-height:1.1;color:var(--primary)}
+.topbar .sub{font-size:clamp(.8rem,1.6vw,1rem);font-weight:800;color:var(--ink-soft)}
+
+/* ---- Hero ---- */
+.hero{text-align:center;margin:8px 0 30px}
+.hero h2{font-size:clamp(1.5rem,5vw,3rem);font-weight:900;color:var(--ink)}
+.hero h2 em{font-style:normal;color:var(--amber)}
+.hero p{margin-top:10px;font-weight:800;color:var(--ink-soft);font-size:clamp(.9rem,2vw,1.1rem);max-width:620px;margin-left:auto;margin-right:auto}
+
+/* ---- Category grid ---- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:22px}
+.cat-card{
+  background:var(--card-bg);border-radius:28px;padding:22px;cursor:pointer;text-decoration:none;color:inherit;
+  border:2px solid #BAE6FD;border-bottom:5px solid #BAE6FD;
+  box-shadow:0 8px 0 var(--card-shadow,rgba(186,230,253,.9)),0 15px 25px rgba(0,0,0,.08);
+  transition:transform .15s ease,border-bottom-width .15s ease,box-shadow .15s ease;
+  display:flex;gap:16px;align-items:flex-start;position:relative;overflow:hidden;
+}
+.cat-card:hover{transform:translateY(-3px);border-color:var(--primary-l);box-shadow:0 8px 0 rgba(56,189,248,.5),0 18px 30px rgba(2,132,199,.18)}
+.cat-card:active{transform:translateY(3px);border-bottom-width:1px;box-shadow:0 2px 0 rgba(56,189,248,.5),0 6px 12px rgba(0,0,0,.06)}
+.cat-card.featured{border-color:var(--amber-l);border-bottom-color:var(--amber-l);background:linear-gradient(180deg,#FFFBEB,#fff)}
+.cat-ico{width:72px;height:72px;flex:none;border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:38px;
+  background:linear-gradient(145deg,#E0F2FE,#BAE6FD);box-shadow:0 6px 0 #7DD3FC}
+.cat-card.featured .cat-ico{background:linear-gradient(145deg,#FEF3C7,#FDE68A);box-shadow:0 6px 0 #FBBF24}
+.cat-body h3{font-size:clamp(1rem,2.2vw,1.3rem);font-weight:900;color:var(--ink);line-height:1.25}
+.cat-body p{margin-top:6px;font-size:.85rem;font-weight:700;color:var(--ink-soft);line-height:1.45}
+.tag{display:inline-block;margin-top:10px;font-size:.72rem;font-weight:900;letter-spacing:.4px;
+  padding:4px 12px;border-radius:999px;background:#E0F2FE;color:#0369A1}
+.cat-card.featured .tag{background:#FEF3C7;color:#B45309}
+.games-pill{margin-top:8px;display:flex;align-items:center;gap:6px;font-size:.78rem;font-weight:900;color:var(--primary)}
+.games-pill .n{background:var(--primary);color:#fff;border-radius:999px;padding:2px 9px;font-size:.72rem}
+
+/* ---- Zalo widget ---- */
+.zalo-fab{
+  position:fixed;right:20px;bottom:24px;z-index:60;width:62px;height:62px;border-radius:50%;
+  background:linear-gradient(145deg,#3DDBF5,#05E13C);border:none;cursor:pointer;
+  font-size:30px;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 8px 0 #06a421,0 15px 25px rgba(0,0,0,.18);
+  transition:transform .15s,box-shadow .15s;
+}
+.zalo-fab:hover{transform:translateY(-3px)}
+.zalo-fab:active{transform:translateY(3px);box-shadow:0 2px 0 #06a421,0 6px 12px rgba(0,0,0,.15)}
+.zalo-card{
+  position:fixed;right:20px;bottom:96px;z-index:59;width:min(330px,calc(100vw - 40px));
+  background:rgba(255,255,255,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border:2px solid #9FF3C2;border-radius:28px;padding:18px;display:none;
+  box-shadow:0 8px 0 rgba(16,185,129,.3),0 15px 25px rgba(0,0,0,.12);
+  animation:slideUpFade .3s ease;
+}
+.zalo-card.open{display:block}
+.zalo-card h4{font-size:1rem;font-weight:900;color:#067A2B;margin-bottom:4px}
+.zalo-card p{font-size:.8rem;font-weight:700;color:var(--ink-soft);line-height:1.5;margin-bottom:12px}
+.zbtn{display:flex;align-items:center;gap:10px;width:100%;justify-content:center;
+  background:linear-gradient(145deg,#3DDBF5,#05E13C);color:#fff;border:none;cursor:pointer;
+  font-family:inherit;font-weight:900;font-size:1rem;border-radius:999px;padding:12px;
+  border-bottom:4px solid #06a421;box-shadow:0 6px 0 #06a421;transition:transform .12s,box-shadow .12s;text-decoration:none}
+.zbtn:hover{transform:translateY(-2px)}
+.zbtn:active{transform:translateY(2px);box-shadow:0 1px 0 #06a421}
+footer{margin-top:40px;text-align:center;font-size:.8rem;font-weight:800;color:var(--ink-soft)}
+
+@keyframes slideUpFade{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@media (max-width:600px){ .topbar{justify-content:center;text-align:center} }
+</style>
+</head>
+<body>
+
+<div class="wave-bg" aria-hidden="true">
+  <svg viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0,60 C150,110 350,10 600,60 C850,110 1050,10 1200,60 L1200,120 L0,120 Z" fill="#BAE6FD"/></svg>
+  <svg viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0,75 C200,30 400,115 600,75 C800,35 1000,115 1200,75 L1200,120 L0,120 Z" fill="#7DD3FC"/></svg>
+</div>
+
+<div class="wrap">
+  <header class="topbar">
+    <div class="logo" aria-hidden="true">🌊</div>
+    <div>
+      <h1>Thư Viện Trò Chơi Giáo Dục</h1>
+      <div class="sub">Trải nghiệm an toàn • Học vui mỗi ngày • Offline 100%</div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h2>Chọn <em>chủ đề</em> để bắt đầu</h2>
+    <p>Từng khối chủ đề chứa các bộ câu hỏi tình huống sinh động chuẩn kiến thức, có ảnh minh họa, âm thanh, bảng xếp hạng 3D và kết nối Google Sheet.</p>
+  </section>
+
+  <main class="grid" id="catGrid"></main>
+
+  <footer>© 2026 An Toàn Dưới Nước • Nền tảng Web Game Giáo Dục HTML5 • PWA Offline</footer>
+</div>
+
+<!-- ===== Widget Zalo hỗ trợ giáo viên ===== -->
+<aside class="zalo-card" id="zaloCard" role="dialog" aria-label="Hỗ trợ Zalo">
+  <h4>💬 Hỗ trợ giáo viên</h4>
+  <p>Gặp khó khăn khi cài đặt, đồng bộ điểm với Google Sheet hay chỉnh sửa ngân hàng câu hỏi? Nhắn Zalo để đội ngũ hỗ trợ.</p>
+  <a class="zbtn" id="zaloBtn" href="https://zalo.me/0123456789" target="_blank" rel="noopener">Chat Zalo ngay</a>
+</aside>
+<button class="zalo-fab" id="zaloFab" aria-label="Mở hộp thoại Zalo" title="Hỗ trợ giáo viên">💬</button>
+
+<script>
+(function(){
+  // ===== Danh mục chủ đề (cấu hình tập trung, mở rộng được) =====
+  var CATEGORIES = [
+    {
+      id:'13_mn_phong_tranh_duoi_nuoc',
+      title:'Phòng Tránh Đuối Nước Cho Bé',
+      desc:'Kỹ năng phòng chống đuối nước & an toàn vùng sông nước cho trẻ 3–6 tuổi.',
+      level:'Mầm non (3–6 tuổi)',
+      emoji:'🦺', featured:true,
+      link:'13_mn_phong_tranh_duoi_nuoc/index.html',
+      games:1
+    }
+  ];
+
+  var grid = document.getElementById('catGrid');
+  CATEGORIES.forEach(function(c){
+    var a = document.createElement('a');
+    a.className = 'cat-card' + (c.featured ? ' featured' : '');
+    a.href = c.link;
+    a.innerHTML =
+      '<div class="cat-ico" aria-hidden="true">' + c.emoji + '</div>' +
+      '<div class="cat-body">' +
+        '<h3>' + c.title + '</h3>' +
+        '<p>' + c.desc + '</p>' +
+        '<span class="tag">' + c.level + '</span>' +
+        '<div class="games-pill"><span class="n">' + c.games + '</span> trò chơi</div>' +
+      '</div>';
+    grid.appendChild(a);
+  });
+
+  var fab = document.getElementById('zaloFab');
+  var card = document.getElementById('zaloCard');
+  fab.addEventListener('click', function(){
+    card.classList.toggle('open');
+    fab.setAttribute('aria-expanded', card.classList.contains('open'));
+  });
+  document.addEventListener('click', function(e){
+    if(!card.contains(e.target) && e.target !== fab && !card.classList.contains('open')) return;
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "An Toàn Dưới Nước - Trò Chơi Giáo Dục",
+  "short_name": "DuoiNuoc",
+  "description": "Nền tảng web game giáo dục về phòng tránh đuối nước cho học sinh mầm non, hoạt động 100% offline.",
+  "lang": "vi",
+  "start_url": "games/index.html",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F0F9FF",
+  "theme_color": "#0284C7",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

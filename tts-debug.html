@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Debug TTS - Vui Học</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Nunito',sans-serif;background:linear-gradient(135deg,#fef3c7,#dbeafe);min-height:100vh;padding:2rem}
+.card{background:#fff;border-radius:24px;padding:2rem;max-width:700px;margin:0 auto;box-shadow:0 8px 30px rgba(0,0,0,.1)}
+h1{color:#f59e0b;margin-bottom:1rem}
+h2{color:#374151;margin:1.5rem 0 1rem;font-size:1.2rem}
+.btn{padding:.75rem 1.5rem;border:none;border-radius:12px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;margin:.5rem .5rem .5rem 0;transition:all .2s}
+.btn-blue{background:#0ea5e9;color:#fff}
+.btn-green{background:#10b981;color:#fff}
+.btn-red{background:#ef4444;color:#fff}
+.btn:hover{transform:scale(1.05)}
+textarea{width:100%;padding:1rem;border:2px solid #e5e7eb;border-radius:12px;font-size:1rem;font-family:'Nunito',sans-serif;margin:1rem 0}
+textarea:focus{outline:none;border-color:#0ea5e9}
+#status{padding:1rem;background:#f3f4f6;border-radius:12px;margin:1rem 0;font-weight:700}
+.voice-list{max-height:400px;overflow-y:auto}
+.voice-item{padding:.75rem;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center}
+.voice-item:last-child{border-bottom:none}
+.badge{display:inline-block;padding:.25rem .75rem;border-radius:20px;font-size:.8rem;font-weight:800}
+.badge-vi{background:#d1fae5;color:#065f46}
+.badge-other{background:#e5e7eb;color:#374151}
+.log{background:#1f2937;color:#10b981;padding:1rem;border-radius:12px;font-family:monospace;font-size:.9rem;max-height:300px;overflow-y:auto;margin-top:1rem}
+.log::-webkit-scrollbar{width:8px}
+.log::-webkit-scrollbar-thumb{background:#374151;border-radius:4px}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>🎙️ Debug TTS Tiếng Việt</h1>
+  <p>Công cụ kiểm tra giọng đọc và test Text-to-Speech</p>
+  
+  <div id="status">⏳ Đang kiểm tra voice...</div>
+  
+  <h2>📋 Danh Sách Voice Hệ Thống</h2>
+  <div class="voice-list" id="voiceList"></div>
+  
+  <h2>🎤 Test Phát Âm</h2>
+  <textarea id="textInput" rows="4" placeholder="Nhập text tiếng Việt để test...">Xin chào các bé! Hôm nay chúng ta học về an toàn giao thông nhé!</textarea>
+  <br>
+  <button class="btn btn-blue" onclick="speakText()">🔊 Phát âm</button>
+  <button class="btn btn-red" onclick="stopSpeech()">⏹️ Dừng</button>
+  
+  <h2>📝 Log</h2>
+  <div class="log" id="log"></div>
+</div>
+
+<script>
+let vietnameseVoice = null;
+const logEl = document.getElementById('log');
+const statusEl = document.getElementById('status');
+const voiceListEl = document.getElementById('voiceList');
+
+function log(msg) {
+  const time = new Date().toLocaleTimeString('vi-VN');
+  logEl.innerHTML += `<div>[${time}] ${msg}</div>`;
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+function init() {
+  log('Khởi động TTS debug tool...');
+  
+  if(!('speechSynthesis' in window)) {
+    statusEl.textContent = '❌ Trình duyệt không hỗ trợ Speech Synthesis';
+    log('ERROR: SpeechSynthesis API not available');
+    return;
+  }
+  
+  // Force reload voices
+  window.speechSynthesis.cancel();
+  const voices = window.speechSynthesis.getVoices();
+  
+  if(voices.length === 0) {
+    statusEl.textContent = '⏳ Đang load voices... Vui lòng chờ';
+    log('Voices chưa sẵn sàng, đang chờ...');
+    
+    window.speechSynthesis.onvoiceschanged = () => {
+      const v = window.speechSynthesis.getVoices();
+      renderVoices(v);
+      findVietnameseVoice(v);
+    };
+  } else {
+    renderVoices(voices);
+    findVietnameseVoice(voices);
+  }
+}
+
+function renderVoices(voices) {
+  voiceListEl.innerHTML = '';
+  voices.forEach((v, i) => {
+    const div = document.createElement('div');
+    div.className = 'voice-item';
+    const isVi = v.lang.startsWith('vi');
+    div.innerHTML = `
+      <span>${v.name}</span>
+      <div>
+        <span class="badge ${isVi ? 'badge-vi' : 'badge-other'}">${v.lang}</span>
+        ${v.localService ? '<span style="font-size:.75rem;color:#6b7280;margin-left:.5rem">Local</span>' : ''}
+        ${v.default ? '<span style="font-size:.75rem;color:#fbbf24;margin-left:.5rem">★ Default</span>' : ''}
+      </div>
+    `;
+    voiceListEl.appendChild(div);
+  });
+}
+
+function findVietnameseVoice(voices) {
+  // Tìm voice tiếng Việt ưu tiên Google
+  vietnameseVoice = voices.find(v => 
+    v.lang === 'vi-VN' && v.name.includes('Google')
+  ) || voices.find(v => 
+    v.lang === 'vi-VN' && v.name.includes('Hương')
+  ) || voices.find(v => v.lang.startsWith('vi'));
+  
+  if(vietnameseVoice) {
+    statusEl.innerHTML = `✅ Tìm thấy voice: <strong>${vietnameseVoice.name}</strong> (${vietnameseVoice.lang})`;
+    statusEl.style.background = '#d1fae5';
+    log(`FOUND Vietnamese voice: ${vietnameseVoice.name}`);
+  } else {
+    statusEl.innerHTML = '⚠️ Không tìm thấy voice tiếng Việt trong hệ thống';
+    statusEl.style.background = '#fef3c7';
+    log('WARNING: No Vietnamese voice found!');
+    log('HƯỚNG DẪN: Cài thêm voice tiếng Việt từ Windows Settings');
+  }
+}
+
+function speakText() {
+  if(!('speechSynthesis' in window)) {
+    alert('Trình duyệt không hỗ trợ TTS!');
+    return;
+  }
+  
+  const text = document.getElementById('textInput').value;
+  if(!text.trim()) {
+    alert('Vui lòng nhập text để đọc!');
+    return;
+  }
+  
+  window.speechSynthesis.cancel();
+  
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'vi-VN';
+  utterance.pitch = vietnameseVoice ? 1.2 : 1.0;
+  utterance.rate = 0.9;
+  
+  if(vietnameseVoice) {
+    utterance.voice = vietnameseVoice;
+    log(`Speaking with: ${vietnameseVoice.name}`);
+  } else {
+    log('Using default voice (no Vietnamese voice selected)');
+  }
+  
+  utterance.onstart = () => log('▶️ Bắt đầu đọc...');
+  utterance.onend = () => log('⏹️ Đã đọc xong');
+  utterance.onerror = (e) => log(`❌ Lỗi: ${e.error}`);
+  
+  window.speechSynthesis.speak(utterance);
+}
+
+function stopSpeech() {
+  window.speechSynthesis.cancel();
+  log('⏹️ Đã dừng phát âm');
+}
+
+// Khởi tạo khi load trang
+window.addEventListener('load', init);
+window.speechSynthesis.onvoiceschanged = () => {
+  const voices = window.speechSynthesis.getVoices();
+  renderVoices(voices);
+  findVietnameseVoice(voices);
+};
+</script>
+</body>
+</html>

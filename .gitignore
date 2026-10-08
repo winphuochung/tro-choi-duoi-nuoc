@@ -1,0 +1,16 @@
+# ---- Agnes agent workspace (cache, search images, temp) - NOT project code ----
+.agnes/
+
+# ---- OS / editor noise ----
+Thumbs.db
+desktop.ini
+.DS_Store
+*.tmp
+
+# ---- Node tooling (if any) ----
+node_modules/
+*.log
+
+# Keep only source. If you ever add build output, ignore it here:
+# dist/
+# build/
